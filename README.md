@@ -1,37 +1,29 @@
 # Interactive Smart Mirror
 Interactive Smart Mirror - Senior Design Project
 
-Team:
+### Team:
+Alisha Forrest, ahf5
 
-Alisha Forrest
+Alec Rosenbaum, alr152
 
-Alec Rosenbaum
+Daxton Scholl, djs129 
 
-Daxton Scholl 
+# Design Considerations:
 
+## Software
 
-#Software
+* The OS will be linux-based (currently testing on ubuntu, but may move to a lighter-weight alternative)
+* We will use Google Chrome (or Chromium) with a custom extension to drive the display
+* We will write an application utilizing the Leap Motion API for gesture control
+## Hardware
 
-#Hardware
+* The hardware used for this project needs to be under the $400 budget set by the Senior Design Instructor.
+* Processing will be done onboard to keep network traffic low, and to eliminate remote processing overhead and complexity
+* We have a 21" LCD and 60GB SSD, so those will be used for the display and storage
+* The mirror will be bezel-less, but the mirror diagonal will be larger than the LCD by a few inches
+* We will use the Leap Motion sensor as input for hand-tracking
+## Gesture Interaction Design
+There will be two primary forms of gesture interaction: One Finger and Two Fingers.
 
-Design Considerations:
-
-
--Cost
-
-The hardware used for this project needs to be under the $400 budget set by the Senior Design Instructor. 
-
-
--Hardware Limitations
-
-The product shall perform processing of gestures onboard in order to help keep network interaction to a minimum and avoid the need for remote processing overhead. The Mirror shall operate using an LCD panel which is sized 21” diagonal. 
-
-
--Hardware Specifications
-
-The interactive mirror shall share sizing with the LCD panel on which it is mounted, this allows for a cleaner design as well as a closer physical realization of screen size. The mirrored component will be affixed to the front of this panel with another medium separating the physical panel and reflective coating. 
-
-
--Software Environment
-
-The interactive mirror will be developed to run on a linux-based operating system and will extensively use Google’s Chrome browser. The gesture control shall be performed using a Leap Motion motion sensor, and a proprietary API our team will create. 
+### One Finger
+### Two Fingers
