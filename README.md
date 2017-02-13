@@ -26,7 +26,14 @@ Daxton Scholl, djs129
 
 ## Gesture Interaction Design
 
-There will be two primary forms of gesture interaction: One Finger and Two Fingers.
+There will be two primary forms of gesture interaction: one finger or two fingers.
+Users will use either one or two fingers to interact with a plane floating a few inches off of the surface of the mirror. Using only the index finger will do things that moving a mouse would normally do. In the case of our widgets it might make configuration buttons appear on hover, or highlight a widget. Using two index fingers will allow touchscreen-style gestures. An example of this could be scrolling around an application.  As we determine what exact gestures and details are included in each of the above categories, we will fill out the below sections.
 
 ### One Finger
+
+* move cursor
+* click on long hover
+
 ### Two Fingers
+
+* scrolling
