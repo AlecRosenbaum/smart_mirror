@@ -2,8 +2,11 @@
 Interactive Smart Mirror - Senior Design Project
 
 Team:
+
 Alisha Forrest
+
 Alec Rosenbaum
+
 Daxton Scholl 
 
 
