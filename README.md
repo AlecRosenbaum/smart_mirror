@@ -15,6 +15,7 @@ Daxton Scholl, djs129
 * The OS will be linux-based (currently testing on ubuntu, but may move to a lighter-weight alternative)
 * We will use Google Chrome (or Chromium) with a custom extension to drive the display
 * We will write an application utilizing the Leap Motion API for gesture control
+
 ## Hardware
 
 * The hardware used for this project needs to be under the $400 budget set by the Senior Design Instructor.
@@ -22,7 +23,9 @@ Daxton Scholl, djs129
 * We have a 21" LCD and 60GB SSD, so those will be used for the display and storage
 * The mirror will be bezel-less, but the mirror diagonal will be larger than the LCD by a few inches
 * We will use the Leap Motion sensor as input for hand-tracking
+
 ## Gesture Interaction Design
+
 There will be two primary forms of gesture interaction: One Finger and Two Fingers.
 
 ### One Finger
