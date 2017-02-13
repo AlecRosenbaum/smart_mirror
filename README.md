@@ -1,2 +1,6 @@
-# smart_mirror
-Smart Mirror - Senior Design Project
+# Interactive Smart Mirror
+Interactive Smart Mirror - Senior Design Project
+
+#Software
+
+#Hardware
