@@ -6,9 +6,12 @@
 
 ## Why are we building a neural net?
 
-I have made next to no progress towards getting other tools to work. So, instead I will work to create a basic neural net for handwriting recognition. Handwriting data is quite similar to the example dataset MNIST (for which better than 99% accuracy has been achieved), so this should hopefully yield acceptable results. 
+I have made next to no progress towards getting other tools to work. So, instead I will work to create a basic neural net for handwriting recognition. Handwriting data is quite similar to the example dataset MNIST (for which better than 99% accuracy has been achieved), so this should hopefully yield acceptable results.
 
-Then, we can set up a local server that just accepts inking data from a javascript/html canvas in the browser, and returns what letter it is.
+
+## What happens when it's trained?
+
+Tensorflow has methods for serving trained models. The idea would then be to set up a local server for the trained model on the mirror, then the javascript web-frontend would send a 32x32 image (based on a canvas) of each letter written, it would be parsed into a real letter, then sent back to the javascript frontend.
 
 
 ## Environment/Dependencies
