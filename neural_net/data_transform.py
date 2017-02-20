@@ -7,6 +7,7 @@ from PIL import Image
 
 
 def main():
+	"""main"""
 	DATA_FILE = "data/ujipenchars2.txt"
 
 	data = []
@@ -23,15 +24,11 @@ def main():
 
 			lines = i.split("\n")
 			labels.append(i[0])
-			# print(lines)
 
 			for j in lines[1:]:
 				if points.match(j):
 					strokes.append([int(k) for k in j.split("#")[1].strip().split(" ")])
 			data.append(strokes)
-
-	# print(labels)
-	# print(data)
 
 	for idx, i in enumerate(data):
 		directory = os.path.join("data", labels[idx])
@@ -41,7 +38,18 @@ def main():
 
 
 def proc_data(pen_strokes, output_path):
-	label = "A"
+	"""process pen strokes data into a 32x32 image
+
+	The pen stroke data is expected in the following format:
+	[
+		[x1, y1, x2, y2, ...],  # penstroke 1
+		[x1, y1, x2, y2, ...],  # penstroke 2
+	]
+
+	Args:
+		pen_strokes: 2D array (see format above)
+		output_path: where to output the image
+	"""
 	ink_data = []
 
 	all_data = []
@@ -72,7 +80,7 @@ def proc_data(pen_strokes, output_path):
 		data = np.reshape(data, (-1, 2))
 		data = [[int(math.floor((i[0] - x_min)*scale) + 1 + offset_x), int(math.floor((i[1] - y_min)*scale) + 1 + offset_y)] for i in data]
 
-		# interpolate
+		# interpolate to create continuous lines
 		i = 0
 		while i < len(data) - 1:
 			x_diff = data[i+1][0] - data[i][0]
@@ -87,13 +95,16 @@ def proc_data(pen_strokes, output_path):
 
 	# create image
 	img_data = np.empty(shape=(32, 32), dtype=np.uint8)
+	# init as all white
 	for x in range(img_data.shape[0]):
 		for y in range(img_data.shape[1]):
 			img_data[x][y] = 255
 
+	# apply inking
 	for coord in ink_data:
 		img_data[coord[1]][coord[0]] = 0
 
+		# make lines slightly thicker
 		offsets = [
 			[0, 1],
 			[1, 1],
