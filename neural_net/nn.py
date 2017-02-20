@@ -1,269 +1,145 @@
-#    Copyright 2016 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
-#    Licensed under the Apache License, Version 2.0 (the "License");
-#    you may not use this file except in compliance with the License.
-#    You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#         http://www.apache.org/licenses/LICENSE-2.0
 #
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS,
-#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#    See the License for the specific language governing permissions and
-#    limitations under the License.
-"""Convolutional Neural Network Estimator for MNIST, built with tf.layers."""
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
 
+"""A very simple MNIST classifier.
+See extensive documentation at
+http://tensorflow.org/tutorials/mnist/beginners/index.md
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import math
-import os
-import csv
-import re
+import argparse
+import sys
 
-import numpy as np
-from PIL import Image
+# from tensorflow.examples.tutorials.mnist import input_data
+
 import tensorflow as tf
 
-from tensorflow.contrib import learn
-from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_fn_lib
-from tensorflow.contrib.learn.python.learn.estimators.estimator import SKCompat
-from tensorflow.contrib.learn.python.learn import metric_spec
+import input_data
 
-tf.logging.set_verbosity(tf.logging.INFO)
+FLAGS = None
 
 
-def cnn_model_fn(features, labels, mode):
-    """Model function for CNN."""
-    # Input Layer
-    # Reshape X to 4-D tensor: [batch_size, width, height, channels]
-    # MNIST images are 28x28 pixels, and have one color channel
-    input_layer = tf.reshape(features, [-1, 32, 32, 1])
+def main(_):
+    # Import data
+    hasy = input_data.read_data_sets(FLAGS.data_dir, one_hot=True)
 
-    # Convolutional Layer #1
-    # Computes 32 features using a 5x5 filter with ReLU activation.
-    # Padding is added to preserve width and height.
-    # Input Tensor Shape: [batch_size, 28, 28, 1]
-    # Output Tensor Shape: [batch_size, 28, 28, 32]
-    conv1 = tf.layers.conv2d(
-        inputs=input_layer,
-        filters=32,
-        kernel_size=[5, 5],
-        padding="same",
-        activation=tf.nn.relu)
+    # Create the model
+    x = tf.placeholder(tf.float32, [None, 1024])
+    W = tf.Variable(tf.zeros([1024, 62]))
+    b = tf.Variable(tf.zeros([62]))
+    y = tf.matmul(x, W) + b
 
-    # Pooling Layer #1
-    # First max pooling layer with a 2x2 filter and stride of 2
-    # Input Tensor Shape: [batch_size, 28, 28, 32]
-    # Output Tensor Shape: [batch_size, 14, 14, 32]
-    pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
+    # Define loss and optimizer
+    y_ = tf.placeholder(tf.float32, [None, 62])
 
-    # Convolutional Layer #2
-    # Computes 64 features using a 5x5 filter.
-    # Padding is added to preserve width and height.
-    # Input Tensor Shape: [batch_size, 14, 14, 32]
-    # Output Tensor Shape: [batch_size, 14, 14, 64]
-    conv2 = tf.layers.conv2d(
-        inputs=pool1,
-        filters=64,
-        kernel_size=[5, 5],
-        padding="same",
-        activation=tf.nn.relu)
+    # The raw formulation of cross-entropy,
+    #
+    #     tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(tf.nn.softmax(y)),
+    #                                   reduction_indices=[1]))
+    #
+    # can be numerically unstable.
+    #
+    # So here we use tf.nn.softmax_cross_entropy_with_logits on the raw
+    # outputs of 'y', and then average across the batch.
+    # cross_entropy = tf.reduce_mean(
+    #         tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
+    # train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
 
-    # Pooling Layer #2
-    # Second max pooling layer with a 2x2 filter and stride of 2
-    # Input Tensor Shape: [batch_size, 14, 14, 64]
-    # Output Tensor Shape: [batch_size, 7, 7, 64]
-    pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
+    # sess = tf.InteractiveSession()
+    # tf.global_variables_initializer().run()
+    # # Train
+    # for _ in range(1000):
+    #     batch_xs, batch_ys = hasy.train.next_batch(100)
+    #     sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
 
-    # Flatten tensor into a batch of vectors
-    # Input Tensor Shape: [batch_size, 7, 7, 64]
-    # Output Tensor Shape: [batch_size, 7 * 7 * 64]
-    pool2_flat = tf.reshape(pool2, [-1, 8 * 8 * 64])
+    # # Test trained model
+    # correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    # accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    # print(sess.run(accuracy, feed_dict={x: hasy.test.images,
+    #                                     y_: hasy.test.labels}))
 
-    # Dense Layer
-    # Densely connected layer with 1024 neurons
-    # Input Tensor Shape: [batch_size, 7 * 7 * 64]
-    # Output Tensor Shape: [batch_size, 1024]
-    dense = tf.layers.dense(inputs=pool2_flat, units=1024, activation=tf.nn.relu)
+    W_conv1 = weight_variable([3, 3, 1, 32])
+    b_conv1 = bias_variable([32])
+    x_image = tf.reshape(x, [-1,32,32,1])
+    
+    h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+    h_pool1 = max_pool_2x2(h_conv1)
 
-    # Add dropout operation; 0.6 probability that element will be kept
-    dropout = tf.layers.dropout(
-        inputs=dense,
-        rate=0.4,
-        training=mode == learn.ModeKeys.TRAIN)
+    W_conv2 = weight_variable([3, 3, 32, 64])
+    b_conv2 = bias_variable([64])
 
-    # Logits layer
-    # Input Tensor Shape: [batch_size, 1024]
-    # Output Tensor Shape: [batch_size, 10]
-    logits = tf.layers.dense(inputs=dropout, units=10)
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+    h_pool2 = max_pool_2x2(h_conv2)
 
-    loss = None
-    train_op = None
+    W_fc1 = weight_variable([8 * 8 * 64, 1024])
+    b_fc1 = bias_variable([1024])
 
-    # Calculate Loss (for both TRAIN and EVAL modes)
-    if mode != learn.ModeKeys.INFER:
-        onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=10)
-        loss = tf.losses.softmax_cross_entropy(
-            onehot_labels=onehot_labels, logits=logits)
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 8*8*64])
+    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
-    # Configure the Training Op (for TRAIN mode)
-    if mode == learn.ModeKeys.TRAIN:
-        train_op = tf.contrib.layers.optimize_loss(
-            loss=loss,
-            global_step=tf.contrib.framework.get_global_step(),
-            learning_rate=0.001,
-            optimizer="SGD")
+    keep_prob = tf.placeholder(tf.float32)
+    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-    # Generate Predictions
-    predictions = {
-        "classes": tf.argmax(input=logits, axis=1),
-        "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
-    }
+    W_fc2 = weight_variable([1024, 62])
+    b_fc2 = bias_variable([62])
 
-    # Return a ModelFnOps object
-    return model_fn_lib.ModelFnOps(
-        mode=mode,
-        predictions=predictions,
-        loss=loss,
-        train_op=train_op)
+    y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+
+    cross_entropy = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv))
+    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+    correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    for i in range(20000):
+        batch = hasy.train.next_batch(50)
+        if i%100 == 0:
+            train_accuracy = accuracy.eval(feed_dict={
+                x:batch[0], y_: batch[1], keep_prob: 1.0})
+            print("step %d, training accuracy %g"%(i, train_accuracy))
+        train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
+
+    print("test accuracy %g"%accuracy.eval(feed_dict={
+        x: hasy.test.images, y_: hasy.test.labels, keep_prob: 1.0}))
 
 
-def conv_img(path):
-    """reads an image, converts it to an array of black/white values
-
-    Args:
-        path: path to an image
-
-    Returns:
-        1D array of alpha values from the image
-    """
-    img = Image.open(path).convert('L')
-    arr = np.array(img)
-
-    return [j/255 for i in arr for j in i]
+def weight_variable(shape):
+    initial = tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial)
 
 
-def get_data(csv_path):
-    """returns data + labels"""
-    data = load_csv(csv_path)
-    classified = data_by_class(data)
-
-    ret_data = []
-    ret_labels = []
-
-    for _, i in classified.items():
-        for j in i:
-            ret_data.append(conv_img(j['path']))
-            ret_labels.append(ord(j['latex']))
-
-    return ret_data, ret_labels
+def bias_variable(shape):
+    initial = tf.constant(0.1, shape=shape)
+    return tf.Variable(initial)
 
 
-def load_csv(filepath, delimiter=',', quotechar="'"):
-    """
-    Load a CSV file.
-
-    Parameters
-    ----------
-    filepath : str
-        Path to a CSV file
-    delimiter : str, optional
-    quotechar : str, optional
-
-    Returns
-    -------
-    list of dicts : Each line of the CSV file is one element of the list.
-    """
-    data = []
-    csv_dir = os.path.dirname(filepath)
-    with open(filepath, 'r') as csvfile:
-        reader = csv.DictReader(
-            csvfile,
-            delimiter=delimiter,
-            quotechar=quotechar)
-        for row in reader:
-            if 'path' in row:
-                row['path'] = os.path.abspath(
-                    os.path.join(
-                        csv_dir,
-                        row['path']))
-            data.append(row)
-    return data
+def conv2d(x, W):
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
 
-def data_by_class(data):
-    """
-    Organize `data` by class.
-
-    Parameters
-    ----------
-    data : list of dicts
-        Each dict contains the key `symbol_id` which is the class label.
-
-    Returns
-    -------
-    dbc : dict
-        mapping class labels to lists of dicts
-    """
-    dbc = {}
-    prog = re.compile("[a-zA-Z0-9_]")
-    for item in data:
-        if not prog.match(item['latex']):
-            continue
-        if item['symbol_id'] in dbc:
-            dbc[item['symbol_id']].append(item)
-        else:
-            dbc[item['symbol_id']] = [item]
-    return dbc
+def max_pool_2x2(x):
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+                                                strides=[1, 2, 2, 1], padding='SAME')
 
 
-def main(_unused_arg):
-    """main"""
-    # load hasy data
-    data, labels = get_data("hasy-data-labels.csv")
-
-    # divide between training and eval
-    pct_test = .1
-    pct_idx = math.ceil(pct_test*len(labels))
-
-    train_data = np.asarray(data[:pct_idx], dtype=np.float32)
-    train_labels = np.asarray(labels[:pct_idx])
-    eval_data = np.asarray(data[pct_idx+1:], dtype=np.float32)
-    eval_labels = np.asarray(labels[pct_idx+1:])
-
-    # Create the Estimator
-    mnist_classifier = SKCompat(learn.Estimator(
-        model_fn=cnn_model_fn, model_dir="/tmp/hasy_convnet_model"))
-
-    # Set up logging for predictions
-    # Log the values in the "Softmax" tensor with label "probabilities"
-    tensors_to_log = {"probabilities": "softmax_tensor"}
-    logging_hook = tf.train.LoggingTensorHook(
-        tensors=tensors_to_log, every_n_iter=50)
-
-    # Train the model
-    mnist_classifier.fit(
-        x=train_data,
-        y=train_labels,
-        batch_size=100,
-        steps=100,
-        # steps=20000,
-        monitors=[logging_hook])
-
-    # Configure the accuracy metric for evaluation
-    metrics = {
-        "accuracy":
-            metric_spec.MetricSpec(
-                metric_fn=tf.metrics.accuracy, prediction_key="classes"),
-    }
-
-    # Evaluate the model and print results
-    eval_results = mnist_classifier.score(
-        x=eval_data, y=eval_labels, metrics=metrics)
-    print(eval_results)
-
-
-if __name__ == "__main__":
-    tf.app.run()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_dir', type=str, default='/tmp/tensorflow/mnist/input_data',
+                                            help='Directory for storing input data')
+    FLAGS, unparsed = parser.parse_known_args()
+    tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
