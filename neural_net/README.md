@@ -1,11 +1,8 @@
 
 ## Contents
 
-* `hasy-data`: 168236 png images, each 32px x 32px
-* `hasy-data-labels.csv`: Labels for all images.
-* `symbols.csv`: Counts for all symbols included in dataset (includes many non alphanumeric values)
 * `nn.py`: A training script for a neural net to be used with the hasy data.
-
+* `input_data.py`: a utility for reading the input HASYv2 data
 
 ## Why are we building a neural net?
 
@@ -22,7 +19,13 @@ This was writting in Python 3.5 within an Anaconda distribution updated with the
 
 The data set currently being used was recently published with a paper (linked in sources). It includes many characters we don't need, so in the training script it filters the data to only use [characters appectable in gmail usernames](https://support.google.com/a/answer/33386?hl=en)
 
-I haven't uploaded the data set, as it's pretty big and available online.
+I haven't uploaded the data set, as it's pretty big and available online. The files used in the data set are:
+
+* `hasy-data`: 168236 png images, each 32px x 32px
+* `hasy-data-labels.csv`: Labels for all images.
+
+I am currently still considering methods for expanding this data set and/or converting other data sets to the same format so they can be used in training.
+
 
 ## Sources
 
