@@ -94,8 +94,8 @@ def main(_):
     keep_prob = tf.placeholder(tf.float32)
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-    W_fc2 = weight_variable([1024, 62])
-    b_fc2 = bias_variable([62])
+    W_fc2 = weight_variable([1024, 37])
+    b_fc2 = bias_variable([37])
 
     y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
@@ -106,7 +106,7 @@ def main(_):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
-    for i in range(20000):
+    for i in range(15000):
         batch = hasy.train.next_batch(50)
         if i%100 == 0:
             train_accuracy = accuracy.eval(feed_dict={
