@@ -6,6 +6,11 @@ var canvas_simple;
 var context_simple;
 var canvasWidth = $(window).width();
 var canvasHeight = $(window).height();
+
+$(document).ready(function() {
+	prepareSimpleCanvas();
+});
+
 /**
 * Creates a canvas element.
 */
