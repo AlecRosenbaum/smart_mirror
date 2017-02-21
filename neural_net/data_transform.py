@@ -12,6 +12,7 @@ def main():
 
 	data = []
 	labels = []
+	images = []
 
 	file_data = open(DATA_FILE, 'r').read()
 	file_data = file_data.split("WORD ")
@@ -34,10 +35,10 @@ def main():
 		directory = os.path.join("data", labels[idx])
 		if not os.path.exists(directory):
 			os.makedirs(directory)
-		proc_data(i, os.path.join(directory, str(idx) + ".png"))
+		images.append(proc_data(i, output_path=os.path.join(directory, str(idx) + ".png")))
 
 
-def proc_data(pen_strokes, output_path):
+def proc_data(pen_strokes, output_path=None):
 	"""process pen strokes data into a 32x32 image
 
 	The pen stroke data is expected in the following format:
@@ -49,6 +50,9 @@ def proc_data(pen_strokes, output_path):
 	Args:
 		pen_strokes: 2D array (see format above)
 		output_path: where to output the image
+
+	Returns:
+		a 32x32 numpy array containing the image data
 	"""
 	ink_data = []
 
@@ -123,8 +127,11 @@ def proc_data(pen_strokes, output_path):
 				pass
 
 	# save image
-	img = Image.fromarray(img_data)
-	img.save(output_path)
+	if output_path is not None:
+		img = Image.fromarray(img_data)
+		img.save(output_path)
+
+	return img_data
 
 if __name__ == '__main__':
 	main()

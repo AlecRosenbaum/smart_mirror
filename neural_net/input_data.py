@@ -1,19 +1,4 @@
-# Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-
-"""Functions for downloading and reading MNIST data."""
+"""Functions for downloading and reading data."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -32,8 +17,8 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
 
-# SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
 CSV_FILE = "hasy-data-labels.csv"
+UJIPEN_DATA = "ujipenchars2.txt"
 
 
 def _read32(bytestream):
@@ -94,38 +79,38 @@ def conv_label(char):
     '7': 33,
     '8': 34,
     '9': 35,
-    'a': 36,
-    'b': 37,
-    'c': 38,
-    'd': 39,
-    'e': 40,
-    'f': 41,
-    'g': 42,
-    'h': 43,
-    'i': 44,
-    'j': 45,
-    'k': 46,
-    'l': 47,
-    'm': 48,
-    'n': 49,
-    'o': 50,
-    'p': 51,
-    'q': 52,
-    'r': 53,
-    's': 54,
-    'u': 55,
-    'v': 56,
-    'w': 57,
-    'x': 58,
-    'y': 59,
-    'z': 60,
-    '-': 61,
+    # 'a': 36,
+    # 'b': 37,
+    # 'c': 38,
+    # 'd': 39,
+    # 'e': 40,
+    # 'f': 41,
+    # 'g': 42,
+    # 'h': 43,
+    # 'i': 44,
+    # 'j': 45,
+    # 'k': 46,
+    # 'l': 47,
+    # 'm': 48,
+    # 'n': 49,
+    # 'o': 50,
+    # 'p': 51,
+    # 'q': 52,
+    # 'r': 53,
+    # 's': 54,
+    # 'u': 55,
+    # 'v': 56,
+    # 'w': 57,
+    # 'x': 58,
+    # 'y': 59,
+    # 'z': 60,
+    '-': 36,
   }
   return labels[char]
 
 
-def get_data(csv_path):
-  """returns data + labels"""
+def get_hasy_data(csv_path):
+  """returns data + labels from the HASYv2 data set"""
   csv_data = load_csv(csv_path)
   data = data_to_list(csv_data)
 
@@ -139,6 +124,130 @@ def get_data(csv_path):
     ret_data[idx] = conv_img(i[1])
 
   return ret_data, ret_labels
+
+
+def get_ujipen_data(path):
+  """returns data + labels from the ujipen data set"""
+  data = []
+  labels = []
+  images = []
+
+  file_data = open(path, 'r').read()
+  file_data = file_data.split("WORD ")
+
+  label = re.compile("[0-9A-Z-]")
+  points = re.compile(".*POINTS.*")
+  for i in file_data:
+    if label.match(i[0]):
+      strokes = []
+
+      lines = i.split("\n")
+      labels.append(conv_label(i[0]))
+
+      for j in lines[1:]:
+        if points.match(j):
+          strokes.append([int(k) for k in j.split("#")[1].strip().split(" ")])
+      data.append(strokes)
+
+  for idx, i in enumerate(data):
+    images.append(proc_uji_data(i))
+  return images, numpy.asarray(labels, dtype=numpy.uint8)
+
+
+def proc_uji_data(pen_strokes, output_path=None):
+  """process pen strokes data into a 32x32 image
+
+  The pen stroke data is expected in the following format:
+  [
+    [x1, y1, x2, y2, ...],  # penstroke 1
+    [x1, y1, x2, y2, ...],  # penstroke 2
+  ]
+
+  Args:
+    pen_strokes: 2D array (see format above)
+    output_path: where to output the image
+
+  Returns:
+    a 32x32 numpy array containing the image data
+  """
+  ink_data = []
+
+  all_data = []
+  for i in pen_strokes:
+    all_data += i
+
+  all_data = numpy.reshape(all_data, (-1, 2))
+
+  # pre-process data (crop, scale, center)
+  x_max = max([i[0] for i in all_data])
+  x_min = min([i[0] for i in all_data])
+
+  y_max = max([i[1] for i in all_data])
+  y_min = min([i[1] for i in all_data])
+
+  scale_x = 29 / (x_max - x_min)
+  scale_y = 29 / (y_max - y_min)
+  if scale_x < scale_y:
+    scale = scale_x
+    offset_x = 0
+    offset_y = 15 - (y_max - y_min) * scale_x/2
+  else:
+    scale = scale_y
+    offset_x = 15 - (x_max - x_min) * scale_y/2
+    offset_y = 0
+
+  for data in pen_strokes:
+    data = numpy.reshape(data, (-1, 2))
+    data = [[int(math.floor((i[0] - x_min)*scale) + 1 + offset_x), int(math.floor((i[1] - y_min)*scale) + 1 + offset_y)] for i in data]
+
+    # interpolate to create continuous lines
+    i = 0
+    while i < len(data) - 1:
+      x_diff = data[i+1][0] - data[i][0]
+      y_diff = data[i+1][1] - data[i][1]
+      if math.hypot(x_diff, y_diff) > 3:
+        # determine new point location
+        x_offest = math.floor(x_diff/2)
+        y_offest = math.floor(y_diff/2)
+        data.insert(i+1, [data[i][0] + x_offest, data[i][1] + y_offest])
+      i += 1
+    ink_data += data
+
+  # create image
+  img_data = numpy.empty(shape=(32, 32, 1), dtype=numpy.uint8)
+  # init as all white
+  for x in range(img_data.shape[0]):
+    for y in range(img_data.shape[1]):
+      img_data[x][y][0] = 255
+
+  # apply inking
+  for coord in ink_data:
+    img_data[coord[1]][coord[0]][0] = 0
+
+    # make lines slightly thicker
+    offsets = [
+      [0, 1],
+      [1, 1],
+      [1, 0],
+      [1, -1],
+      [0, -1],
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+    ]
+    for i in offsets:
+      try:
+        if not coord[1] % 31 == 0 and not coord[0] % 31 == 0:
+          img_data[coord[1] + i[1]][coord[0] + i[0]][0] = 0
+      except:
+        pass
+
+  # save image
+  if output_path is not None:
+    img = Image.fromarray(img_data)
+    img.save(output_path)
+
+  return img_data
 
 
 def load_csv(filepath, delimiter=',', quotechar="'"):
@@ -191,7 +300,7 @@ def data_to_list(data):
     ]
   """
   ret = []
-  prog = re.compile("[a-zA-Z0-9-]")
+  prog = re.compile("[A-Z0-9-]")
   for i in data:
     if not prog.match(i['latex']):
       continue
@@ -382,43 +491,13 @@ def read_data_sets(train_dir,
     test = fake()
     return base.Datasets(train=train, validation=validation, test=test)
 
-  # TRAIN_IMAGES = 'train-images-idx3-ubyte.gz'
-  # TRAIN_LABELS = 'train-labels-idx1-ubyte.gz'
-  # TEST_IMAGES = 't10k-images-idx3-ubyte.gz'
-  # TEST_LABELS = 't10k-labels-idx1-ubyte.gz'
+  hasy_images, hasy_labels = get_hasy_data(CSV_FILE)
+  uji_images, uji_labels = get_ujipen_data(UJIPEN_DATA)
+  images = numpy.concatenate(hasy_images, uji_images)
+  labels = numpy.concatenate(hasy_labels, uji_labels)
+  labels = dense_to_one_hot(labels, 37)
 
-  # local_file = base.maybe_download(TRAIN_IMAGES, train_dir,
-  #                                  SOURCE_URL + TRAIN_IMAGES)
-  # with open(local_file, 'rb') as f:
-  #   train_images = extract_images(f)
-
-  # local_file = base.maybe_download(TRAIN_LABELS, train_dir,
-  #                                  SOURCE_URL + TRAIN_LABELS)
-  # with open(local_file, 'rb') as f:
-  #   train_labels = extract_labels(f, one_hot=one_hot)
-
-  # local_file = base.maybe_download(TEST_IMAGES, train_dir,
-  #                                  SOURCE_URL + TEST_IMAGES)
-  # with open(local_file, 'rb') as f:
-  #   test_images = extract_images(f)
-
-  # local_file = base.maybe_download(TEST_LABELS, train_dir,
-  #                                  SOURCE_URL + TEST_LABELS)
-  # with open(local_file, 'rb') as f:
-  #   test_labels = extract_labels(f, one_hot=one_hot)
-
-  # if not 0 <= validation_size <= len(train_images):
-  #   raise ValueError(
-  #       'Validation size should be between 0 and {}. Received: {}.'
-  #       .format(len(train_images), validation_size))
-
-  # validation_images = train_images[:validation_size]
-  # validation_labels = train_labels[:validation_size]
-  # train_images = train_images[validation_size:]
-  # train_labels = train_labels[validation_size:]
-
-  images, labels = get_data(CSV_FILE)
-  labels = dense_to_one_hot(labels, 62)
+  print("data size", len(labels))
 
   # divide between training and eval
   pct_train = .8
