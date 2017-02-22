@@ -2,7 +2,7 @@
 ## Contents
 
 * `nn.py`: A training script for a neural net to be used with the hasy data.
-* `input_data.py`: a utility for reading the input HASYv2 data
+* `input_data.py`: a utility for reading input data
 * `data_transform.py`: a utility used for expanding the data set to include digitally handwritten characters stored in "ujipen" format
 
 ## Why are we building a neural net?
@@ -35,9 +35,15 @@ I haven't uploaded the data sets, as they're pretty big and available online. Th
 
 I am currently still considering methods for expanding this data set and/or converting other data sets to the same format so they can be used in training.
 
+### NIST handprinted forms and characters
+
+All images are provided divided by character type in 128x128 format. They were converted to 32x32 using the command from the base directory (this took a little while):
+`find . -wholename "*/train*/*.png" | xargs -l -i convert {} -resize 32x32 {}`
+
 
 ## Sources
 
 * HASY data source: <https://arxiv.org/pdf/1701.08380.pdf>
 * UJI pen data source: [homepage](https://archive.ics.uci.edu/ml/datasets/UJI+Pen+Characters+%28Version+2%29), [data](https://archive.ics.uci.edu/ml/machine-learning-databases/uji-penchars/version2/ujipenchars2.txt)
+* NIST data source: [homepage](https://www.nist.gov/srd/nist-special-database-19), [data](https://s3.amazonaws.com/nist-srd/SD19/by_class.zip)
 * The neural net is modified code from <https://www.tensorflow.org/get_started/mnist/pros>

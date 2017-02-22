@@ -20,7 +20,7 @@ $(document).ready(function() {
 */
 function prepareSimpleCanvas()
 {
-	// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
+	// Create the canvas
 	var canvasDiv = document.getElementById('canvasDiv');
 	canvas = document.createElement('canvas');
 	canvas.setAttribute('width', canvasWidth);
@@ -32,12 +32,12 @@ function prepareSimpleCanvas()
 	}
 	context = canvas.getContext("2d");
 
-	// setup stroke properties
+	// setup brush stroke properties
 	context.strokeStyle = "#000000";
 	context.lineJoin = "round";
 	context.lineWidth = 10; // radius of circles drawn
 	
-	// Add mouse events
+	// Add mouse event listeners
 	$('#canvasSimple').mousedown(function(e) {
 		// Mouse down location
 		var mouseX = e.pageX - this.offsetLeft;
@@ -62,13 +62,6 @@ function prepareSimpleCanvas()
 	
 	$('#canvasSimple').mouseleave(function(e) {
 		paint = false;
-	});
-	
-	$('#clearCanvasSimple').mousedown(function(e) {
-		clickX = new Array();
-		clickY = new Array();
-		clickDrag = new Array();
-		clearcanvas(); 
 	});
 	
 	// Add touch event listeners to canvas element
