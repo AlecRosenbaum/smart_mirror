@@ -1,9 +1,13 @@
-var clickX_simple = new Array();
-var clickY_simple = new Array();
-var clickDrag_simple = new Array();
-var paint_simple;
-var canvas_simple;
-var context_simple;
+var WAIT_PERIOD = 1500;
+var letter_pts = new Array();
+var last_drawn_time = new Date().getTime()
+
+var clickX = new Array();
+var clickY = new Array();
+var clickDrag = new Array();
+var paint;
+var canvas;
+var context;
 var canvasWidth = $(window).width();
 var canvasHeight = $(window).height();
 
@@ -18,116 +22,120 @@ function prepareSimpleCanvas()
 {
 	// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
 	var canvasDiv = document.getElementById('canvasDiv');
-	canvas_simple = document.createElement('canvas');
-	canvas_simple.setAttribute('width', canvasWidth);
-	canvas_simple.setAttribute('height', canvasHeight);
-	canvas_simple.setAttribute('id', 'canvasSimple');
-	canvasDiv.appendChild(canvas_simple);
+	canvas = document.createElement('canvas');
+	canvas.setAttribute('width', canvasWidth);
+	canvas.setAttribute('height', canvasHeight);
+	canvas.setAttribute('id', 'canvasSimple');
+	canvasDiv.appendChild(canvas);
 	if(typeof G_vmlCanvasManager != 'undefined') {
-		canvas_simple = G_vmlCanvasManager.initElement(canvas_simple);
+		canvas = G_vmlCanvasManager.initElement(canvas);
 	}
-	context_simple = canvas_simple.getContext("2d");
+	context = canvas.getContext("2d");
+
+	// setup stroke properties
+	context.strokeStyle = "#000000";
+	context.lineJoin = "round";
+	context.lineWidth = 10; // radius of circles drawn
 	
 	// Add mouse events
-	// ----------------
-	$('#canvasSimple').mousedown(function(e)
-	{
+	$('#canvasSimple').mousedown(function(e) {
 		// Mouse down location
 		var mouseX = e.pageX - this.offsetLeft;
 		var mouseY = e.pageY - this.offsetTop;
 		
-		paint_simple = true;
+		paint = true;
 		addClickSimple(mouseX, mouseY, false);
-		redrawSimple();
+		redraw();
 	});
 	
-	$('#canvasSimple').mousemove(function(e){
-		if(paint_simple){
+	$('#canvasSimple').mousemove(function(e) {
+		if(paint){
 			addClickSimple(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
-			redrawSimple();
+			redraw();
 		}
 	});
 	
-	$('#canvasSimple').mouseup(function(e){
-		paint_simple = false;
-	  	redrawSimple();
+	$('#canvasSimple').mouseup(function(e) {
+		paint = false;
+	  	redraw();
 	});
 	
-	$('#canvasSimple').mouseleave(function(e){
-		paint_simple = false;
+	$('#canvasSimple').mouseleave(function(e) {
+		paint = false;
 	});
 	
-	$('#clearCanvasSimple').mousedown(function(e)
-	{
-		clickX_simple = new Array();
-		clickY_simple = new Array();
-		clickDrag_simple = new Array();
-		clearCanvas_simple(); 
+	$('#clearCanvasSimple').mousedown(function(e) {
+		clickX = new Array();
+		clickY = new Array();
+		clickDrag = new Array();
+		clearcanvas(); 
 	});
 	
 	// Add touch event listeners to canvas element
-	canvas_simple.addEventListener("touchstart", function(e)
-	{
+	canvas.addEventListener("touchstart", function(e) {
 		// Mouse down location
 		var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
 			mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 		
-		paint_simple = true;
+		paint = true;
 		addClickSimple(mouseX, mouseY, false);
-		redrawSimple();
+		redraw();
 	}, false);
-	canvas_simple.addEventListener("touchmove", function(e){
-		
+	canvas.addEventListener("touchmove", function(e) {
 		var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
 			mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
 					
-		if(paint_simple){
+		if(paint){
 			addClickSimple(mouseX, mouseY, true);
-			redrawSimple();
+			redraw();
 		}
 		e.preventDefault()
 	}, false);
-	canvas_simple.addEventListener("touchend", function(e){
-		paint_simple = false;
-	  	redrawSimple();
+	canvas.addEventListener("touchend", function(e) {
+		paint = false;
+	  	redraw();
 	}, false);
-	canvas_simple.addEventListener("touchcancel", function(e){
-		paint_simple = false;
+	canvas.addEventListener("touchcancel", function(e) {
+		paint = false;
 	}, false);
 }
 
-function addClickSimple(x, y, dragging)
-{
-	clickX_simple.push(x);
-	clickY_simple.push(y);
-	clickDrag_simple.push(dragging);
-}
+function addClickSimple(x, y, dragging) {
+	letter_pts.push([x, y]);
+	clickX.push(x);
+	clickY.push(y);
+	clickDrag.push(dragging);
 
-function clearCanvas_simple()
-{
-	context_simple.clearRect(0, 0, canvasWidth, canvasHeight);
-}
+	// wait for drawing to stop, then process
+	last_drawn_time = new Date().getTime()
+	setTimeout(function() {
+		if (new Date().getTime() - last_drawn_time >= WAIT_PERIOD) {
+			console.log(JSON.stringify(letter_pts));
 
-function redrawSimple()
-{
-	clearCanvas_simple();
-	
-	var radius = 10;
-	context_simple.strokeStyle = "#000000";
-	context_simple.lineJoin = "round";
-	context_simple.lineWidth = radius;
-			
-	for(var i=0; i < clickX_simple.length; i++)
-	{		
-		context_simple.beginPath();
-		if(clickDrag_simple[i] && i){
-			context_simple.moveTo(clickX_simple[i-1], clickY_simple[i-1]);
-		}else{
-			context_simple.moveTo(clickX_simple[i]-1, clickY_simple[i]);
+			clearcanvas()
+			letter_pts = new Array()
 		}
-		context_simple.lineTo(clickX_simple[i], clickY_simple[i]);
-		context_simple.closePath();
-		context_simple.stroke();
+	}, WAIT_PERIOD)
+}
+
+function clearcanvas() {
+	context.clearRect(0, 0, canvasWidth, canvasHeight);
+	clickX = new Array()
+	clickY = new Array()
+	clickDraw = new Array()
+}
+
+function redraw() {			
+	for(var i=0; i < clickX.length; i++) {		
+		context.beginPath();
+		if(clickDrag[i] && i) {
+			context.moveTo(clickX[i-1], clickY[i-1]);
+		} else {
+			context.moveTo(clickX[i]-1, clickY[i]);
+		}
+		context.lineTo(clickX[i], clickY[i]);
+		context.closePath();
+		context.stroke();
 	}
 }
 
