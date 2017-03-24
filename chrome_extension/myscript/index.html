@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+
+    <link rel="icon" type="image/png" sizes="96×96" href="./favicon.ico">
+
+    <title>MyScript Unified Sample</title>
+
+    <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Waiting+for+the+Sunrise">
+
+    <!--A WebComponent polyfill is needed to use the web component, has it's not yet well implemented by all browsers-->
+    <script type="text/javascript" src="./bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+
+    <link rel="import" href="./bower_components/myscript-common-element/myscript-common-element.html">
+    <link rel="import" href="./bower_components/myscript-text-web/myscript-text-web.html">
+
+    <style is="custom-style">
+        body {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            height: 100%;
+            max-height: 100%;
+            overflow-x : hidden;
+        }
+        #textInput {
+            height : calc(100vh - 50px);
+        }
+        canvas[id^=ms-rendering-canvas] {
+            background: none;
+        }
+        
+    </style>
+</head>
+<body touch-action="none">
+    <div id="content">
+        <myscript-text-web id="textInput"
+                           host="webdemoapi.myscript.com"
+                           applicationkey="9faa1259-48ba-44c4-9857-b3c86d986f94"
+                           hmackey="fb166b5d-3ffd-93bd-7b5b-bca0fe2216a0"
+                           hidebuttons="true"
+                           hideresult="true"
+                           strokecolor="#FF0000"
+        ></myscript-text-web>
+    </div>
+</body>
+</html>
