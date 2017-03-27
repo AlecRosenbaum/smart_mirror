@@ -2,17 +2,20 @@
 <html>
 <head>
 
-    <link rel="icon" type="image/png" sizes="96×96" href="./favicon.ico">
+    <!-- <link rel="icon" type="image/png" sizes="96×96" href="./favicon.ico"> -->
 
-    <title>MyScript Unified Sample</title>
+    <title>Smart Mirror Dev</title>
 
     <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Waiting+for+the+Sunrise">
 
-    <!--A WebComponent polyfill is needed to use the web component, has it's not yet well implemented by all browsers-->
+    <!--A WebComponent polyfill is needed to use the web component, as it's not yet well implemented by all browsers-->
     <script type="text/javascript" src="./bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <script type="text/javascript" src="./bower_components/ical.js/build/ical.min.js"></script>
-    <script type="text/javascript" src="index.js"></script>
+
+    <!-- moment.js -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    
+    <!-- scripts used in this page -->
+    <script type="text/javascript" src="index.js"></script>
 
     <link rel="import" href="./bower_components/myscript-common-element/myscript-common-element.html">
     <link rel="import" href="./bower_components/myscript-text-web/myscript-text-web.html">
@@ -28,6 +31,9 @@
 
             font-family: "Roboto", "HelveticaNeue-Light";
             font-weight: 300;
+
+            color: white;
+            background-color: black;
 
         }
         #textInput {
@@ -70,12 +76,20 @@
             padding-right: 20px;
         }
 
+        #settings {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+        }
+
     </style>
 </head>
 <body touch-action="none">
     <!--Add buttons to initiate auth sequence and sign out-->
-    <button id="authorize-button" style="display: none;">Authorize</button>
-    <button id="signout-button" style="display: none;">Sign Out</button>
+    <div id='settings'>
+        <button id="authorize-button" style="display: none;">Authorize</button>
+        <button id="signout-button" style="display: none;">Sign Out</button>
+    </div>
 
     <div class='time-frame'>
         <div id='hrmin-part'>
