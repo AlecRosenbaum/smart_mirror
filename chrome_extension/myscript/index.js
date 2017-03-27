@@ -5,27 +5,12 @@
         return document.querySelector(selector);
     }
 
+    // google api client id 922831018117-riq3s1ra0fc2gnqc89nmbo9ua5bv2qgp.apps.googleusercontent.com
+
     window.addEventListener('WebComponentsReady', function () {
 
         var last_res_time = new Date().getTime();
         var handling_res = false;
-        // var writing = false;
-        // $('body').addEventListener('mousedown', function(e) {
-        //     console.log("mousedown");
-        //     last_drawn_time = new Date().getTime();
-        //     writing = true;
-        // }, true);
-        // $('body').addEventListener('mousemove', function(e) {
-        //     last_drawn_time = new Date().getTime();
-        //     console.log("mousemove");
-        // }, true);
-        // $('body').addEventListener('mouseup', function(e) {
-        //     console.log("mouseup");
-        //     last_drawn_time = new Date().getTime();
-        //     writing = false;
-        //     setTimeout(handle_result(), 1500);
-
-        // }, true);
 
         document.addEventListener("keypress", function(event) {
             if (event.keyCode == 13) {
@@ -34,14 +19,26 @@
             }
         })
 
+        var interval = setInterval(function() {
+            var momentNow = moment();
+
+            // set date, day
+            $('#date-part').innerHTML = momentNow.format('MMMM D');
+            $('#day-part').innerHTML = momentNow.format('dddd');
+
+            // set seconds
+            var sec = document.createElement('span')
+            sec.setAttribute('id', 'sec-part')
+            sec.innerHTML = momentNow.format('ss A');
+
+            // set hours:min
+            $('#hrmin-part').innerHTML = momentNow.format('h:mm');
+            $('#hrmin-part').appendChild(sec)
+        }, 1000);
+
 
         $('myscript-text-web').addEventListener('myscript-text-web-result', function(e) { 
-            last_res_time = new Date().getTime();
-            if(!handling_res) {
-                // handle_result();
-                handling_res = true;
-            }
-            
+            last_res_time = new Date().getTime();            
         });
 
         function handle_result() {
@@ -49,7 +46,6 @@
                 setTimeout(handle_result, 100)
             } else {
                 alert($('myscript-text-web').firstcandidate);
-                handling_res = false;
             }
         }
     });
