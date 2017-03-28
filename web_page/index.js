@@ -47,7 +47,6 @@
                     $('#bus-times').empty();
 
                     var predictions = data.getElementsByTagName("prd");
-                    console.log(predictions);
 
                     // want them to be in descending order
                     for (var i = 0; i < predictions.length; i++) {
