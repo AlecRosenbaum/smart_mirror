@@ -1,0 +1,1 @@
+ssh -R 52698:localhost:52698 -i ~/Desktop/git/senior_design/smart_mirror/neural_net/machine_learning_tool.pem ubuntu@ec2-54-237-199-147.compute-1.amazonaws.com

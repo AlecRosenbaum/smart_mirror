@@ -1,0 +1,285 @@
+<!doctype html>
+<html>
+<head>
+
+    <!-- <link rel="icon" type="image/png" sizes="96×96" href="./favicon.ico"> -->
+
+    <title>Smart Mirror Dev</title>
+
+    <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Waiting+for+the+Sunrise">
+
+    <!--A WebComponent polyfill is needed to use the web component, as it's not yet well implemented by all browsers-->
+    <script type="text/javascript" src="./bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+
+    <!-- moment.js -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+    <!-- patapi (port authority api wrapper) -->
+    <script type="text/javascript" src="./node_modules/patapi/index.js"></script>
+
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- scripts used in this page -->
+    <script type="text/javascript" src="index.js"></script>
+
+    <link rel="import" href="./bower_components/myscript-common-element/myscript-common-element.html">
+    <link rel="import" href="./bower_components/myscript-text-web/myscript-text-web.html">
+
+    <style is="custom-style">
+        body {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            height: 100%;
+            max-height: 100%;
+            overflow-x : hidden;
+
+            font-family: "Roboto", "HelveticaNeue-Light";
+            font-weight: 300;
+
+            color: white;
+            background-color: black;
+
+        }
+        #textInput {
+            height : calc(100vh - 50px);
+        }
+        canvas[id^=ms-rendering-canvas] {
+            background: none;
+        }
+
+        .time-frame {
+            padding-left: 20px;
+            padding-right: 5px;
+            padding-top: 20px;
+            float: left;
+            /*position: absolute;*/
+        }
+
+        #hrmin-part {
+            display: inline-block;
+            font-size: 3.2em;
+            letter-spacing: -2px;
+        }
+
+        #sec-part {
+            display: inline-block;
+            font-size: .5em;
+            padding-left: 3px;
+        }
+
+        #day-part {
+            font-size: 1.5em;
+        }
+
+        #date-part {
+            /*font-size: .9em;*/
+        }
+
+        #cal-events {
+            float: right;
+            padding-right: 20px;
+        }
+
+        #settings {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+        }
+
+    </style>
+</head>
+<body touch-action="none">
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <div id='settings'>
+        <button id="authorize-button" style="display: none;">Authorize</button>
+        <button id="signout-button" style="display: none;">Sign Out</button>
+    </div>
+
+    <div class='time-frame'>
+        <div id='hrmin-part'>
+            ##:##
+            <span id='sec-part'>##</span>
+        </div>
+        <div id='day-part'>dddd</div>
+        <div id='date-part'>Month D</div>
+    </div>
+    <div id='cal-events'></div>
+    <div id='bus-times'></div>
+    <div id="content">
+        <myscript-text-web id="textInput"
+                           host="webdemoapi.myscript.com"
+                           applicationkey="9faa1259-48ba-44c4-9857-b3c86d986f94"
+                           hmackey="fb166b5d-3ffd-93bd-7b5b-bca0fe2216a0"
+                           hidebuttons="true"
+                           hideresult="true"
+                           strokecolor="#FF0000"
+        ></myscript-text-web>
+    </div>
+
+    <script type="text/javascript">
+        // Client ID and API key from the Developer Console
+      var CLIENT_ID = '922831018117-riq3s1ra0fc2gnqc89nmbo9ua5bv2qgp.apps.googleusercontent.com';
+
+      // Array of API discovery doc URLs for APIs used by the quickstart
+      var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+      var authorizeButton = document.getElementById('authorize-button');
+      var signoutButton = document.getElementById('signout-button');
+
+      /**
+       *  On load, called to load the auth2 library and API client library.
+       */
+      function handleClientLoad() {
+        gapi.load('client:auth2', initClient);
+      }
+
+      /**
+       *  Initializes the API client library and sets up sign-in state
+       *  listeners.
+       */
+      function initClient() {
+        gapi.client.init({
+          discoveryDocs: DISCOVERY_DOCS,
+          clientId: CLIENT_ID,
+          scope: SCOPES
+        }).then(function () {
+          // Listen for sign-in state changes.
+          gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+
+          // Handle the initial sign-in state.
+          updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+          authorizeButton.onclick = handleAuthClick;
+          signoutButton.onclick = handleSignoutClick;
+        });
+      }
+
+      /**
+       *  Called when the signed in status changes, to update the UI
+       *  appropriately. After a sign-in, the API is called.
+       */
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          authorizeButton.style.display = 'none';
+          signoutButton.style.display = 'block';
+          listUpcomingEvents();
+        } else {
+          authorizeButton.style.display = 'block';
+          signoutButton.style.display = 'none';
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick(event) {
+        gapi.auth2.getAuthInstance().signIn();
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick(event) {
+        gapi.auth2.getAuthInstance().signOut();
+      }
+
+      /**
+       * Append a pre element to the body containing the given message
+       * as its text node. Used to display the results of the API call.
+       *
+       * @param {string} message Text to be placed in pre element.
+       */
+      function appendPre(message) {
+        var pre = document.getElementById('cal-events');
+        var textContent = document.createTextNode(message + '\n');
+        pre.appendChild(textContent);
+      }
+
+      /**
+       * Creates a list of events returned by the API. Used to display the
+       * results of the API call.
+       *
+       * @param {event} event to convert into display
+       */
+      function addEv(event) {
+        var ev_container = document.getElementById('cal-events');
+
+        var ev = document.createElement('div');
+        ev.setAttribute('class', 'event');
+
+        var when = event.start.dateTime;
+        var all_day = false;
+        if (!when) {
+          // all day
+          when = event.start.date;
+          all_day = true;
+        }
+
+        var parsed_date = moment(when)
+
+        var date_el = document.createElement('span');
+        date_el.innerHTML = parsed_date.format("M/D ")
+        ev.appendChild(date_el);
+
+        if (!all_day) {
+          var time_el = document.createElement('span');
+          time_el.innerHTML = parsed_date.format("h:mm a");
+          ev.appendChild(time_el)
+        }
+
+        var summary = document.createElement('span');
+        summary.innerHTML = " " + event.summary;
+        ev.appendChild(summary);
+
+        ev_container.appendChild(ev);
+      }
+
+      /**
+       * Print the summary and start datetime/date of the next ten events in
+       * the authorized user's calendar. If no events are found an
+       * appropriate message is printed.
+       */
+      function listUpcomingEvents() {
+        time_min = new Date()
+        time_max = new Date()
+        time_max.setDate(time_min.getDate() + 7)
+
+        gapi.client.calendar.events.list({
+          'calendarId': 'primary',
+          'timeMin': time_min.toISOString(),
+          'timeMax': time_max.toISOString(),
+          'showDeleted': false,
+          'singleEvents': true,
+          // 'maxResults': 10,
+          'orderBy': 'startTime'
+        }).then(function(response) {
+          var events = response.result.items;
+          appendPre('Upcoming events:');
+
+          if (events.length > 0) {
+            for (i = 0; i < events.length; i++) {
+              var event = events[i];
+              addEv(event);
+              var when = event.start.dateTime;
+              // if (!when) {
+              //   when = event.start.date;
+              // }
+              // appendPre(event.summary + ' (' + when + ')')
+            }
+          } else {
+            appendPre('No upcoming events found.');
+          }
+        });
+      }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    </script>
+</body>
+</html>
