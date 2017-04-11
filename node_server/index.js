@@ -41,7 +41,6 @@ window.addEventListener('WebComponentsReady', function () {
     }, function() {
         // on mouse out, cancel the timer
         if (parseInt($('#mouseover-btn span').html()) > 0) {
-            // $('#stop-input-ctr').css({display: "", "background-color":"", opacity:""});
             $('#mouseover-btn span').html("4");
         }
         
@@ -56,7 +55,10 @@ window.addEventListener('WebComponentsReady', function () {
             document.querySelector('myscript-text-web').clear();
         }
         if (event.keyCode == 32) {
-            $(':focus').click()
+            // this doesn't make sense, but if this delay is removed then chromium crashes on archlinux
+            setTimeout(function() {
+                $(':focus').click()
+            }, 100)
         }
     })
 
@@ -89,12 +91,9 @@ window.addEventListener('WebComponentsReady', function () {
 
 // update bus times script
 function update_bus_func() {
-    var parseXml = function(xmlStr) {
-        return ( new window.DOMParser() ).parseFromString(xmlStr, "text/xml");
-    };
     $.get(
         "http://realtime.portauthority.org/bustime/api/v1/getpredictions",
-        {key : 'VTnArfBnZ7xDacvUcCdqdqwYT', stpid : $('#bus-times').attr("stop")},
+        {key : 'VTnArfBnZ7xDacvUcCdqdqwYT', stpid: $('#bus-times').attr("stop")},
         function(data) {
             $('#bus-times').empty();
 
@@ -113,7 +112,12 @@ function update_bus_func() {
                 // create element with prediction time (minutes until arrival)
                 var time = document.createElement('span');
                 time.setAttribute('class', 'prd-time');
-                time.innerHTML = moment.duration(prdtm.diff(moment())).asMinutes().toFixed(1) + " min";
+                var time_diff = moment.duration(prdtm.diff(moment())).asMinutes();
+                if(time_diff <= .5) {
+                    time.innerHTML = "DUE";
+                } else {
+                    time.innerHTML = time_diff.toFixed(1) + " min";
+                }
 
                 // add to page
                 var ctr = document.createElement('div');
@@ -132,9 +136,10 @@ function updateBusStopOnClick(){
     $('#bus-times').attr('stop', this.value);
 
     $('#mouseover-btn').css({display:"block"});
-    $('#stop-input-ctr #centering-ctr #bus-stop-input').css({display: "none"});
+    $('#bus-stop-input').css({display:"none"});
     $('#stop-input-ctr').css({display: "", "background-color":"", opacity:""});
     $('#mouseover-btn span').html("4");
+
     update_bus_func();
 }
 
