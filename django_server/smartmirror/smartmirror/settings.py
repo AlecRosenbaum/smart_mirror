@@ -25,7 +25,7 @@ SECRET_KEY = 'rknm!gwv#y*zy@i!mc#@%#)zji+lhn26+eh9(a#2f-w)+e$2*@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.0.112"]
 
 
 # Application definition
@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'djangobower',
+    
+    # local apps
+    'accounts',
+    'display',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +59,7 @@ ROOT_URLCONF = 'smartmirror.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,6 +104,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_REDIRECT_URL = 'settings'
+
+LOGIN_URL = 'login'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -118,3 +127,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_FINDERS = (
+    # default
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    
+    # bower
+    'djangobower.finders.BowerFinder',
+)
+
+BOWER_COMPONENTS_ROOT = '/home/smartmirror/git/smart_mirror/django_server/components/'
+
+BOWER_INSTALLED_APPS = (
+    "jquery#2.1",
+    "myscript-common-element",
+    "paper-button",
+    "myscript-text-web",
+    "moment",
+    "leapjs",
+)

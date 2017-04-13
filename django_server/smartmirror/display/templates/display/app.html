@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}App{% endblock %}
+
+
+{% block imports %}
+  <!-- moment.js + jquery -->
+  <script src="{% static 'moment/min/moment.min.js' %}"></script>
+  <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+
+  <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  {% comment %}
+
+  <!-- MyScript + dependencies -->
+  <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Waiting+for+the+Sunrise">
+  <script type="text/javascript" src="{% static 'webcomponentsjs/webcomponents-lite.min.js' %}"></script>
+  <link rel="import" href="{% static 'myscript-common-element/myscript-common-element.html' %}">
+  <link rel="import" href="{% static 'myscript-text-web/myscript-text-web.html' %}">
+
+  <!-- leap motion + dependencies -->
+  <script type="text/javascript" src="{% static 'leapjs/leap-0.6.4.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/4.7.2/kinetic.min.js"></script>
+
+
+  <!-- weather -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.simpleWeather/3.1.0/jquery.simpleWeather.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.css">
+  <script type="text/javascript" src="{% static 'display/js/weather.js' %}"></script>
+  {% endcomment %}
+
+  <!-- scripts used in this page -->
+  <script src="{% static 'display/js/index.js' %}"></script>
+
+  <!-- custom styling -->
+  <link rel="stylesheet" type="text/css" href="{% static 'display/css/index.css' %}">
+{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+
+{% block content %}
+  
+<!--Add buttons to initiate auth sequence and sign out-->
+<div id="top-ctr">
+  <ul id='time-frame'>
+    <li id='hrmin-part'>##:##<span id='sec-part'>##</span></li>
+    <li id='day-part'>dddd</li>
+    <li id='date-part'>Month D</li>
+  </ul>
+  </div>
+</div>
+<div id="mid-ctr">
+  <div id="bus-ctr">
+    <div id='bus-title'>Arrivals at Stop <span id='bus-stop'></span></div>
+    <div id='bus-times' stop="2634"></div>
+  </div>
+  <div id='cal-events'>Some Text</div>
+</div>
+
+{% comment %}
+<div id='settings'>
+  <div id="btn-ctr">
+    <button id="authorize-button" class="hover-delay" style="display: none;">Authorize</button>
+    <button id="signout-button" class="hover-delay" style="display: none;">Sign Out</button>
+  </div>
+</div>
+
+
+<div id='left'>
+  <div id="bus-ctr">
+    <div id="stop-input-ctr" class="overlay">
+      <div id="centering-ctr">
+        <div id="mouseover-btn">EDIT <span>4</span></div>
+        
+        <!-- <button id="mouseover-btn">EDIT <span>3</span></button> -->
+        <input id="bus-stop-input" type="text" style="display: none" placeholder="Enter Stop #" onclick="updateBusStopOnClick();">
+      </div>
+    </div>
+    <div id='bus-times' stop="2634"></div>
+  </div>
+</div>
+<div id='cal-events'></div>
+<div id="content">
+  <myscript-text-web id="textInput"
+                     host="webdemoapi.myscript.com"
+                     applicationkey="49f25f8c-7ff8-48c7-8976-ad4d804a49e0"
+                     hmackey="ea137f5d-11a3-494d-81ec-d4ec8916b797"
+                     hidebuttons="true"
+                     hideresult="true"
+                     strokecolor="#FF0000"
+  ></myscript-text-web>
+</div>
+{% endcomment %}
+<div id="weather-container">
+  <div id="weather"></div>
+</div>
+
+<!-- load google api -->
+{% comment %}
+<script async defer src="https://apis.google.com/js/api.js"
+  onload="this.onload=function(){};handleClientLoad()"
+  onreadystatechange="if (this.readyState === 'complete') this.onload()">
+</script>
+{% endcomment %}
+
+{% endblock %}
