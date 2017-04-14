@@ -136,7 +136,7 @@ STATICFILES_FINDERS = (
     'djangobower.finders.BowerFinder',
 )
 
-BOWER_COMPONENTS_ROOT = '/home/smartmirror/git/smart_mirror/django_server/components/'
+BOWER_COMPONENTS_ROOT = '/home/ubuntu/git/smart_mirror/django_server/components/'
 
 BOWER_INSTALLED_APPS = (
     "jquery#2.1",
