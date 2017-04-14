@@ -23,11 +23,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/4.7.2/kinetic.min.js"></script>
 
 
+  {% endcomment %}
   <!-- weather -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.simpleWeather/3.1.0/jquery.simpleWeather.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.css">
   <script type="text/javascript" src="{% static 'display/js/weather.js' %}"></script>
-  {% endcomment %}
 
   <!-- scripts used in this page -->
   <script src="{% static 'display/js/index.js' %}"></script>
@@ -94,7 +94,7 @@
 </div>
 {% endcomment %}
 <div id="weather-container">
-  <div id="weather"></div>
+  <ul id="weather"></ul>
 </div>
 
 <!-- load google api -->
