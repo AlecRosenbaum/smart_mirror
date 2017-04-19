@@ -14,7 +14,7 @@ body {
 
 }
 #textInput {
-    height : calc(100vh - 50px);
+    height: 100%;
 }
 canvas[id^=ms-rendering-canvas] {
     background: none;
@@ -124,6 +124,11 @@ canvas[id^=ms-rendering-canvas] {
 
 #content {
     z-index: 100;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
 }
 
 .overlay {
@@ -162,6 +167,7 @@ canvas[id^=ms-rendering-canvas] {
     list-style: none;
     width: 100%;
     padding: 0;
+    font-size: 1.5em;
 }
 .weather-high {
     font-size: 1.2em;
@@ -180,6 +186,15 @@ canvas[id^=ms-rendering-canvas] {
 .weather-prediction-ctr {
     display: inline-block;
     width: 50%;
+}
+.weather-center-ctr {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+}
+.icon-ctr {
+    margin-top: -10px;
 }
 
 /* weather icons*/
@@ -240,3 +255,19 @@ i {
 .icon-45:before { content: "S"; }
 .icon-46:before { content: "U"; }
 .icon-47:before { content: "S"; }
+
+/* calendar */
+#cal-ul {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+}
+#cal-title {
+    font-size: 1.2em;
+}
+
+/* settings button */
+#settings-btn-ctr .circle-timer {
+    /*position: absolute;*/
+    float: right;
+}

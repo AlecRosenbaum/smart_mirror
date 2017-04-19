@@ -1,11 +1,11 @@
 // google api client id 922831018117-riq3s1ra0fc2gnqc89nmbo9ua5bv2qgp.apps.googleusercontent.com
 $( document ).ready( function () {
 
-    // // globals
-    // var touching = false;
-    // var input = false;
-    // var hovering = false;
-    // var swipe_stabilizer_timeout = null;
+    // globals
+    var touching = false;
+    var input = false;
+    var hovering = null;
+    var swipe_stabilizer_timeout = null;
 
     // // init auth bottons
     // authorizeButton = document.getElementById('authorize-button');
@@ -95,100 +95,114 @@ $( document ).ready( function () {
     // bus update interval
     var bus_interval = startInterval(15, update_bus_func);
 
-    // // leap motion controller
-    // var stageWidth = document.getElementById('ms-capture-canvas-0').offsetWidth;
-    // var stageHeight = document.getElementById('ms-capture-canvas-0').offsetHeight;
+    // leap motion controller
+    var stageWidth = document.getElementById('textInput').offsetWidth;
+    var stageHeight = document.getElementById('textInput').offsetHeight;
 
-    // var leap = new Leap.Controller();
+    var leap = new Leap.Controller({
+        scheme: 'ws:',
+        port: 6437,
+    });
 
-    // leap.on("frame", function(frame) {
-    //     // update finger tip display with data from latest frame
-    //     var tipPointer = 0;
-    //     var drawArea = document.getElementById('myscript-input-area');
-    //     if (frame.valid) {
-    //         if (input == false && frame.fingers.length == 0 || hovering == true && input == true) {
-    //             document.querySelector('myscript-text-web').clear();
-    //             hovering = false;
-    //         }
-    //         if (swipe_stabilizer_timeout != null) {
-    //             return;
-    //         }
-    //         for (var p = 0; p < frame.fingers.length; p++) {
-    //             // if it's an index finger
-    //             if (frame.fingers[p].type == 1) {
-    //                 var pointable = frame.fingers[p];
-    //                 var pos = frame.interactionBox.normalizePoint(pointable.tipPosition, true);
-    //                 var x = pos[0] * stageWidth;
-    //                 var y = stageHeight - pos[1] * stageHeight;
+    leap.on("frame", function(frame) {
+        // update finger tip display with data from latest frame
+        var tipPointer = 0;
+        var drawArea = document.getElementById('myscript-input-area');
+        if (frame.valid) {
+            // if there are no fingers in the frame (and not logging input)
+            if (input == false && frame.fingers.length == 0) { // || hovering == true && input == true) {
+                document.querySelector('myscript-text-web').clear();
+                // hovering = false;
+            }
 
-    //                 if (input){
-    //                     if (pointable.touchZone == "touching" || pointable.touchZone == "hovering") {
-    //                         // if not already touching, simulate mouse click event
-    //                         if (touching == false) {
-    //                             // mouse click event
-    //                             // console.log("pointerdown", x, y)
-    //                             drawArea.dispatchEvent(new PointerEvent( 'pointerdown', {
-    //                                 pointerId: 1,
-    //                                 clientX: x,
-    //                                 clientY: y,
-    //                                 timeStamp: + new Date()
-    //                             }));
-    //                             touching = true;
-    //                         }
-    //                         // simulate pointer movement
-    //                         // console.log("pointermove", x, y)
-    //                         drawArea.dispatchEvent(new PointerEvent('pointermove', {
-    //                             pointerId: 1,
-    //                             clientX: x,
-    //                             clientY: y,
-    //                             timeStamp: + new Date()
-    //                         }));
-    //                     } else {
-    //                         // pointer up event, no longer touching
-    //                         if (touching == true) {
-    //                             // console.log("pointerup", x, y)
-    //                             drawArea.dispatchEvent(new PointerEvent("pointerup", {
-    //                                 pointerId: 1,
-    //                                 clientX: x,
-    //                                 clientY: y,
-    //                                 timeStamp: + new Date()
-    //                             }));
-    //                         }
-    //                         touching = false;
-    //                     }
-    //                 } else {
-    //                     // make a dot appear
-    //                     document.querySelector('myscript-text-web').clear();
-    //                     drawArea.dispatchEvent(new PointerEvent('pointerdown', {
-    //                         pointerId: 1,
-    //                         clientX: x,
-    //                         clientY: y,
-    //                         timeStamp: + new Date()
-    //                     }));
-    //                     drawArea.dispatchEvent(new PointerEvent("pointerup", {
-    //                         pointerId: 1,
-    //                         clientX: x,
-    //                         clientY: y,
-    //                         timeStamp: + new Date()
-    //                     }));
+            // ignore input as soon as a swipe is recognized
+            if (swipe_stabilizer_timeout != null) {
+                return;
+            }
 
-    //                     // if element is one of our hoverbuttons, simulate a hover
-    //                     if (isDescendant(document.getElementById("bus-ctr"), document.elementFromPoint(x, y))) {
-    //                         if (!hovering) {
-    //                             $("#stop-input-ctr").addClass("hover");
-    //                             $('#stop-input-ctr').mouseenter();
-    //                         }
-    //                         hovering = true;
-    //                     } else {
-    //                         hovering = false;
-    //                         $("#stop-input-ctr").removeClass("hover");
-    //                         $('#stop-input-ctr').mouseleave();
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // });
+            // loook for the index finger
+            for (var p = 0; p < frame.fingers.length; p++) {
+                // if it's an index finger
+                if (frame.fingers[p].type == 1) {
+                    var pointable = frame.fingers[p];
+                    var pos = frame.interactionBox.normalizePoint(pointable.tipPosition, true);
+                    var x = pos[0] * stageWidth;
+                    var y = stageHeight - pos[1] * stageHeight;
+
+                    if (input){
+                        if (pointable.touchZone == "touching" || pointable.touchZone == "hovering") {
+                            // if not already touching, simulate mouse click event
+                            if (touching == false) {
+                                // mouse click event
+                                // console.log("pointerdown", x, y)
+                                drawArea.dispatchEvent(new PointerEvent( 'pointerdown', {
+                                    pointerId: 1,
+                                    clientX: x,
+                                    clientY: y,
+                                    timeStamp: + new Date()
+                                }));
+                                touching = true;
+                            }
+                            // simulate pointer movement
+                            // console.log("pointermove", x, y)
+                            drawArea.dispatchEvent(new PointerEvent('pointermove', {
+                                pointerId: 1,
+                                clientX: x,
+                                clientY: y,
+                                timeStamp: + new Date()
+                            }));
+                        } else {
+                            // pointer up event, no longer touching
+                            if (touching == true) {
+                                // console.log("pointerup", x, y)
+                                drawArea.dispatchEvent(new PointerEvent("pointerup", {
+                                    pointerId: 1,
+                                    clientX: x,
+                                    clientY: y,
+                                    timeStamp: + new Date()
+                                }));
+                            }
+                            touching = false;
+                        }
+                    } else {
+                        // make a dot appear
+                        document.querySelector('myscript-text-web').clear();
+                        drawArea.dispatchEvent(new PointerEvent('pointerdown', {
+                            pointerId: 1,
+                            clientX: x,
+                            clientY: y,
+                            timeStamp: + new Date()
+                        }));
+                        drawArea.dispatchEvent(new PointerEvent("pointerup", {
+                            pointerId: 1,
+                            clientX: x,
+                            clientY: y,
+                            timeStamp: + new Date()
+                        }));
+
+                        // if element is one of our hoverbuttons, simulate a hover
+                        $('.leap-btn').each(function(){
+                            // console.log(document.elementFromPoint(x, y))
+                            if (isDescendant(this, document.elementFromPoint(x, y))) {
+                                // console.log("hovering")
+                                if (hovering == null) {
+                                    $(this).addClass("hover");
+                                    $(this).mouseenter();
+                                }
+                                hovering = this;
+                            } else {
+                                if(hovering == this) {
+                                    hovering = null;
+                                    $(this).removeClass("hover");
+                                    $(this).mouseleave();
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+        }
+    });
 
     // leap.on("gesture", function(gesture) {
     //     if (gesture.type == "swipe") {
@@ -213,9 +227,11 @@ $( document ).ready( function () {
     //     }
     // })
 
-    // var leap_connect_interval = startInterval(.5, function(){
-    //     leap.connect();
-    // })
+    var leap_connect_interval = startInterval(.5, function(){
+        if(!leap.connected()){
+            leap.connect();
+        }
+    });
 
 });
 

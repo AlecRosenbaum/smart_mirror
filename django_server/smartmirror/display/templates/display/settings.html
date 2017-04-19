@@ -1,10 +1,15 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}Settings{% endblock %}
 
+{% block imports %}
+  <link rel="stylesheet" type="text/css" href="{% static 'display/css/settings.css' %}">
+{% endblock %}
+
 {% block content %}
-  <h2>Settings</h2>
-  <form method="post">
+  <h1 id="title" class="title-center">Settings</h1>
+  <form method="post" class="center">
     {% csrf_token %}
     {% if messages %}
     <ul class="messages">
@@ -13,8 +18,42 @@
         {% endfor %}
     </ul>
     {% endif %}
-    {{ user_form.as_p }}
-    {{ profile_form.as_p }}
-    <button type="submit">Save Changes</button>
+    <h3 class="title-center">Identity</h3>
+    <div>
+      {{ user_form.as_p }}
+      <div class="fieldWrapper">
+        {{ profile_form.time_zone.errors }}
+        {{ profile_form.time_zone.label_tag }}
+        {{ profile_form.time_zone }}
+      </div>
+    </div>
+    <h3 class="title-center">Bus Stop</h3>
+    <div class="fieldWrapper">
+      {{ profile_form.bus_stop.errors }}
+      {{ profile_form.bus_stop.label_tag }}
+      {{ profile_form.bus_stop }}
+    </div>
+    <h3 class="title-center">Weather</h3>
+    <div>
+      <div class="fieldWrapper">
+        {{ profile_form.zip_code.errors }}
+        {{ profile_form.zip_code.label_tag }}
+        {{ profile_form.zip_code }}
+      </div>
+      <div class="fieldWrapper">
+        {{ profile_form.metric_units.errors }}
+        {{ profile_form.metric_units.label_tag }}
+        {{ profile_form.metric_units }}
+      </div>
+    </div>
+    <h3 class="title-center">Calendar</h3>
+    <div class="fieldWrapper">
+      {{ profile_form.ical_link.errors }}
+      {{ profile_form.ical_link.label_tag }}
+      {{ profile_form.ical_link }}
+    </div>
+    <h3 id="mirror-title" class="title-center">Mirror</h3>
+    <div class="center">{{ mirror_id }}</div><br/>
+    <button id="submit-btn" type="submit" class="center">Save Changes</button>
   </form>
 {% endblock %}

@@ -21,8 +21,13 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     url(r'^app/$', display_views.app, name='app'),
+    url(r'^app/(?P<account>[0-9]+)$', display_views.app, name='app'),
     url(r'^settings/$', display_views.settings, name='settings'),
+    url(r'^pair/$', display_views.pair, name='pair'),
+    url(r'^pair/(?P<form_val>[0-9]+)$', display_views.pair, name='pair'),
+    url(r'^new/$', display_views.new, name='new'),
     url(r'^login/$', auth_views.login, {'template_name': 'accounts/login.html'}, name='login'),
     url(r'^logout/$', auth_views.logout, name='logout'),
     url(r'^admin/', admin.site.urls),
-] + staticfiles_urlpatterns()
+]
+urlpatterns += staticfiles_urlpatterns()

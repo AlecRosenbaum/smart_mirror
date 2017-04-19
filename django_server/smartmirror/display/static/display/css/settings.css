@@ -1,0 +1,13 @@
+.center {
+    display: inline-block;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+}
+.title-center {
+    text-align: center;
+}
+
+#mirror-title, #submit-btn{
+    margin-bottom: 10px;
+}

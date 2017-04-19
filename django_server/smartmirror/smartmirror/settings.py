@@ -36,7 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # extensions
     'djangobower',
+    'sslserver',
     
     # local apps
     'accounts',
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # default
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -136,6 +140,10 @@ STATICFILES_FINDERS = (
     'djangobower.finders.BowerFinder',
 )
 
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
 BOWER_COMPONENTS_ROOT = '/home/ubuntu/git/smart_mirror/django_server/components/'
 
 BOWER_INSTALLED_APPS = (
@@ -145,4 +153,8 @@ BOWER_INSTALLED_APPS = (
     "myscript-text-web",
     "moment",
     "leapjs",
+    "ical.js",
 )
+
+# make cookies last forever
+SESSION_COOKIE_AGE = 60*60*24*365*2 # 2 years

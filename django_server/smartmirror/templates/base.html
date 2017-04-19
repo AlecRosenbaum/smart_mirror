@@ -1,8 +1,13 @@
+{% load staticfiles %}
+
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>{% block title %}Title{% endblock %}</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+  <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+  
   {% block imports %}
   {% endblock %}
 </head>
@@ -10,7 +15,7 @@
   <header>
     {% block header %}
       {% if user.is_authenticated %}
-        Hi {{ user.username }}!
+        Hi {{ user.first_name }}!
         <a href="{% url 'logout' %}">logout</a>
       {% else %}
         <a href="{% url 'login' %}">login</a>

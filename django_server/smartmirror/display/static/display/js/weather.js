@@ -1,8 +1,11 @@
 
 $(document).ready(function() {
-  navigator.geolocation.getCurrentPosition(function(position) {
-    loadWeather(position.coords.latitude+','+position.coords.longitude); //load weather using your lat/lng coordinates
-  });
+    navigator.geolocation.getCurrentPosition(function(position) {
+        startInterval(60*5, function() {
+            loadWeather(position.coords.latitude+','+position.coords.longitude); //load weather using your lat/lng coordinates
+        });
+    })
+  
 });
 
 function loadWeather(location, woeid) {
@@ -12,31 +15,52 @@ function loadWeather(location, woeid) {
     unit: 'f',
     success: function(weather) {
         var iconType = getIcon(weather.code);
+        $("#weather").empty();
+        console.log("weather-empty");
 
         for(var i = 0; i < Math.min(weather.forecast.length, 2); i++) {
+            // day label
+            var label = document.createElement("span");
+            label.innerHTML = weather.forecast[i].day;
+            
+            var label_ctr = document.createElement("li");
+            label_ctr.setAttribute('class', 'weather-center-ctr');
+            label_ctr.appendChild(label)
+
             // icon
             var icon = document.createElement("i");
             icon.setAttribute('class', 'icon-'+weather.forecast[i].code);
             
             var icon_ctr = document.createElement("li");
+            icon_ctr.setAttribute('class', 'icon-ctr');
             icon_ctr.appendChild(icon)
 
             // forecast high
-            var high = document.createElement("li");
+            var high = document.createElement("span");
             high.innerHTML = weather.forecast[i].high;
             high.setAttribute('class', 'weather-high');
 
+            // forecast divider
+            var slash = document.createElement("span");
+            slash.innerHTML = "/";
 
             // forecast low
-            var low = document.createElement("li");
+            var low = document.createElement("span");
             low.innerHTML = weather.forecast[i].low;
             low.setAttribute('class', 'weather-low');
 
+            // temperature container
+            var temp_ctr = document.createElement("li");
+            temp_ctr.setAttribute('class', 'weather-center-ctr');
+            temp_ctr.appendChild(high);
+            temp_ctr.appendChild(slash);
+            temp_ctr.appendChild(low);
+
             // add to predictions
             var prediction = document.createElement("ul");
+            prediction.appendChild(label_ctr);
             prediction.appendChild(icon_ctr);
-            prediction.appendChild(high);
-            prediction.appendChild(low);
+            prediction.appendChild(temp_ctr);
             prediction.setAttribute('class', 'weather-prediction');
             
             var prediction_ctr = document.createElement("li");
@@ -45,6 +69,8 @@ function loadWeather(location, woeid) {
 
 
             $("#weather").append(prediction_ctr);
+            console.log("weather-added");
+
         }
     
         // html = '<table><tr><td><h2><i class="wi wi-'+iconType+'"></i> '+weather.temp+'&deg;'+weather.units.temp+'</h2>';
@@ -146,3 +172,7 @@ function getIcon(code) {
       return iconType;
 }
 
+function startInterval(seconds, callback) {
+    callback();
+    return setInterval(callback, seconds * 1000);
+}

@@ -1,0 +1,53 @@
+html {
+	height: 100%;
+}
+
+main {
+    height: 100%;
+}
+#centering-ctr {
+	position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+h1 {
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.pair-msg {
+    display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#input-ctr {
+	display: inline-block;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 20px;
+}
+
+header {
+    display: none;
+}
+
+/* for text input styling */
+#textInput {
+    height: 100%;
+}
+canvas[id^=ms-rendering-canvas] {
+    background: none;
+}
+#content {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+}

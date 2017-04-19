@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Pair{% endblock %}
+
+{% block imports %}
+    <!-- jquery -->
+    <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+
+    <!-- MyScript + dependencies -->
+    <link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Waiting+for+the+Sunrise">
+    <script type="text/javascript" src="{% static 'webcomponentsjs/webcomponents-lite.min.js' %}"></script>
+    <link rel="import" href="{% static 'myscript-common-element/myscript-common-element.html' %}">
+    <link rel="import" href="{% static 'myscript-text-web/myscript-text-web.html' %}">
+
+    <!-- leap motion + dependencies -->
+    <script type="text/javascript" src="{% static 'leapjs/leap-0.6.4.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/kineticjs/4.7.2/kinetic.min.js"></script>
+
+    
+    <script src="{% static 'display/js/pair.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'display/css/pair.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div id='centering-ctr'>
+        <h1>Welcome!</h1>
+        <div id="pair-msg-ctr">
+            <span class="pair-msg">Pair this mirror with your account!</span> <br/>
+            <span class="pair-msg">Go to Settings -> Mirror for Instructions.</span>
+        </div>
+        <div id="input-ctr">
+            <form id="input-form" method="post">
+                {% csrf_token %}
+                <input type="text" 
+                       id="short_id" 
+                       name="short_id" 
+                       placeholder="Enter # here to pair" 
+                       autofocus="autofocus" 
+                       {% if value %}
+                           value="{{value}}" 
+                       {% endif %}/>
+            </form>
+        </div>
+    </div>
+    <div id="content">
+        <myscript-text-web id="textInput"
+                           host="webdemoapi.myscript.com"
+                           applicationkey="49f25f8c-7ff8-48c7-8976-ad4d804a49e0"
+                           hmackey="ea137f5d-11a3-494d-81ec-d4ec8916b797"
+                           hidebuttons="true"
+                           hideresult="true"
+                           strokecolor="#FF0000"
+                           contenttypes='{% verbatim %}["number"]{% endverbatim %}'
+        ></myscript-text-web>
+    </div>
+{% endblock %}

@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -9,7 +11,11 @@ class UserProfile(models.Model):
     bus_stop = models.IntegerField(default=2634)
     zip_code = models.IntegerField(default=15213)
     metric_units = models.BooleanField(default=False)
-    time_zone = models.CharField(max_length=30, default='America/New_York') 
+    time_zone = models.CharField(max_length=30, default='America/New_York')
+    ical_link = models.CharField(max_length=256)
+    mirror = models.UUIDField(default=uuid.uuid4)
+    def __str__(self):
+        return self.user.first_name + " " + self.user.last_name
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
